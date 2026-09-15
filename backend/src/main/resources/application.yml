@@ -1,0 +1,62 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: ecommerce
+
+  # ---------- DATASOURCE (PostgreSQL local) ----------
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Tai171003@}        # đổi thành mật khẩu postgres local của bạn
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: EcommerceHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # ---------- JPA / HIBERNATE ----------
+  jpa:
+    open-in-view: false
+    show-sql: false                         # log SQL qua logging bên dưới
+    hibernate:
+      ddl-auto: none                    # schema do schema.sql quản lý, Hibernate chỉ kiểm tra
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 50        # giảm N+1 khi load quan hệ LAZY
+
+  # Không để Spring tự chạy schema.sql/data.sql
+  sql:
+    init:
+      mode: never
+
+  # ---------- JSON ----------
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    default-property-inclusion: non_null
+
+  # ---------- UPLOAD ẢNH ----------
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+# ---------- LOGGING ----------
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: DEBUG                # in câu SQL
+    org.hibernate.orm.jdbc.bind: TRACE      # in giá trị tham số (Hibernate 6)
+    com.example.ecommerce: DEBUG
