@@ -7,23 +7,17 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "stores")
+@Table(name = "roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class Store extends BaseEntity {
+public class Role extends BaseEntity {
 
-    @Column(name = "store_image")
-    private String storeImage;
-
-    @Column(name = "store_name")
-    private String storeName;
+    /** ADMIN, SELLER, USER — khi cấp quyền Spring Security dùng "ROLE_" + name */
+    @Column(name = "name", nullable = false, unique = true, length = 50)
+    private String name;
 
     @Column(name = "description")
     private String description;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private User owner;
 }

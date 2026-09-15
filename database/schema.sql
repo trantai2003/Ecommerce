@@ -182,3 +182,21 @@ CREATE TABLE transactions (
 CREATE INDEX idx_transactions_user    ON transactions(user_id);
 CREATE INDEX idx_transactions_payment ON transactions(payment_id);
 CREATE INDEX idx_transactions_order   ON transactions(order_id);
+CREATE TABLE roles (
+                       id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       name         VARCHAR(50) NOT NULL UNIQUE,
+                       description  VARCHAR(255)
+);
+
+-- Bảng nối user - role (N-N)
+CREATE TABLE user_roles (
+                            user_id  UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                            role_id  UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+                            PRIMARY KEY (user_id, role_id)
+);
+CREATE INDEX idx_user_roles_role ON user_roles(role_id);
+
+-- Thêm chủ cửa hàng cho store
+ALTER TABLE stores ADD COLUMN owner_id UUID REFERENCES users(id) ON DELETE SET NULL;
+CREATE INDEX idx_stores_owner ON stores(owner_id);
+

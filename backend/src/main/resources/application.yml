@@ -53,10 +53,19 @@ spring:
       max-file-size: 10MB
       max-request-size: 20MB
 
+# ---------- JWT (cau hinh rieng cua ung dung, KHONG nam duoi spring:) ----------
+app:
+  jwt:
+    # Key bí mật độ dài tối thiểu 256-bit (dùng mã hóa HS256)
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    # Thời gian hết hạn của token: 1 ngày (86,400,000 milliseconds)
+    expiration-ms: 86400000
+
 # ---------- LOGGING ----------
 logging:
   level:
     root: INFO
     org.hibernate.SQL: DEBUG                # in câu SQL
     org.hibernate.orm.jdbc.bind: TRACE      # in giá trị tham số (Hibernate 6)
-    com.example.ecommerce: DEBUG
+    com.dev.backend: DEBUG
+
