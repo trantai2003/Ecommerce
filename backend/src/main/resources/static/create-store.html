@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tạo cửa hàng</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1d2330; --muted: #6b7280;
+    --line: #e3e6eb; --primary: #2f6fed; --primary-dark: #2359c7;
+    --ok-bg: #e8f6ee; --ok: #177a45; --err-bg: #fdecec; --err: #b42318;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); padding: 32px 16px; }
+  .wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 20px;
+          grid-template-columns: 1.3fr 1fr; align-items: start; }
+  @media (max-width: 760px) { .wrap { grid-template-columns: 1fr; } }
+  h1 { grid-column: 1 / -1; margin: 0; font-size: 24px; }
+  h1 small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .card h2 { margin: 0 0 14px; font-size: 16px; }
+  label { display: block; font-weight: 600; font-size: 13px; margin: 14px 0 6px; }
+  label .req { color: var(--err); }
+  input, textarea, select { width: 100%; padding: 9px 11px; border: 1px solid var(--line);
+         border-radius: 8px; font: inherit; background: #fff; color: inherit; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+  textarea { resize: vertical; min-height: 80px; }
+  .row { display: flex; gap: 8px; }
+  .row input { flex: 1; }
+  button { border: 0; border-radius: 8px; padding: 10px 16px; font: inherit; font-weight: 600;
+           cursor: pointer; background: var(--primary); color: #fff; }
+  button:hover { background: var(--primary-dark); }
+  button:disabled { opacity: .6; cursor: not-allowed; }
+  button.ghost { background: #eef2fb; color: var(--primary); }
+  button.ghost:hover { background: #e0e8fa; }
+  .submit { width: 100%; margin-top: 20px; padding: 12px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .user-info { font-size: 13px; color: var(--muted); margin-top: 6px; min-height: 20px; }
+  .preview { margin-top: 10px; border: 1px dashed var(--line); border-radius: 8px; height: 160px;
+             display: flex; align-items: center; justify-content: center; overflow: hidden;
+             color: var(--muted); font-size: 13px; background: #fafbfc; }
+  .preview img { width: 100%; height: 100%; object-fit: cover; }
+  .alert { padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; }
+  .alert.ok { background: var(--ok-bg); color: var(--ok); }
+  .alert.err { background: var(--err-bg); color: var(--err); }
+  .store { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .store img { width: 100%; height: 150px; object-fit: cover; display: block; background: #eee; }
+  .store .body { padding: 12px; }
+  .store .name { font-weight: 700; font-size: 16px; }
+  .store .desc { color: var(--muted); font-size: 14px; }
+  pre { background: #0f1420; color: #d6deeb; padding: 12px; border-radius: 8px; font-size: 12px;
+        overflow-x: auto; margin: 14px 0 0; }
+  .empty { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tạo cửa hàng mới
+    <small>GET /users để chọn chủ cửa hàng · POST /store để tạo cửa hàng</small>
+  </h1>
+
+  <!-- FORM -->
+  <form class="card" id="storeForm" novalidate>
+    <h2>Thông tin cửa hàng</h2>
+
+    <label for="search">Chủ cửa hàng <span class="req">*</span></label>
+    <div class="row">
+      <input id="search" placeholder="Tìm theo tên người dùng...">
+      <button type="button" class="ghost" id="btnSearch">Tìm</button>
+    </div>
+    <select id="userSelect" style="margin-top:8px" required>
+      <option value="">Đang tải danh sách người dùng...</option>
+    </select>
+    <div class="user-info" id="userInfo"></div>
+
+    <label for="storeName">Tên cửa hàng <span class="req">*</span></label>
+    <input id="storeName" maxlength="100" placeholder="VD: Shop đồ nữ" required>
+
+    <label for="storeDescriptions">Mô tả</label>
+    <textarea id="storeDescriptions" maxlength="500" placeholder="Giới thiệu ngắn về cửa hàng"></textarea>
+
+    <label for="storeImage">Link ảnh cửa hàng</label>
+    <input id="storeImage" type="url" placeholder="https://...">
+    <div class="preview" id="preview">Chưa có ảnh</div>
+
+    <button type="submit" class="submit" id="btnSubmit">Tạo cửa hàng</button>
+  </form>
+
+  <!-- RESULT -->
+  <div class="card">
+    <h2>Kết quả</h2>
+    <div id="result"><p class="empty">Điền form và bấm "Tạo cửa hàng".</p></div>
+  </div>
+</div>
+
+<script>
+  // Mở trang qua Spring (http://localhost:8080/api/create-store.html) thì dùng đường dẫn tương đối /api,
+  // mở theo cách khác (file://, Live Server...) thì gọi thẳng localhost:8080 (cần bật CORS ở BE).
+  const API = (location.origin === 'http://localhost:8080') ? '/api' : 'http://localhost:8080/api';
+
+  const $ = id => document.getElementById(id);
+  const userSelect = $('userSelect');
+  let users = [];
+
+  // ---------- 1. GET /users ----------
+  async function loadUsers(search = '') {
+    userSelect.innerHTML = '<option value="">Đang tải...</option>';
+    try {
+      const params = new URLSearchParams({ page: 0, size: 50, search });
+      const res = await fetch(`${API}/users?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const page = await res.json();
+      users = page.content || [];
+
+      userSelect.innerHTML = '';
+      userSelect.append(new Option(users.length ? '-- Chọn chủ cửa hàng --' : 'Không tìm thấy người dùng', ''));
+      users.forEach(u => {
+        const opt = new Option(`${u.fullName} (${u.email})${u.status ? '' : ' - đã khóa'}`, u.id);
+        opt.disabled = !u.status;          // không cho chọn user bị khóa
+        userSelect.append(opt);
+      });
+      showUserInfo();
+    } catch (e) {
+      userSelect.innerHTML = '<option value="">Lỗi tải người dùng</option>';
+      showResult('err', `Không gọi được GET /users: ${e.message}. Kiểm tra BE đã chạy và CORS.`);
+    }
+  }
+
+  function showUserInfo() {
+    const u = users.find(x => x.id === userSelect.value);
+    $('userInfo').textContent = u ? `${u.address || 'Chưa có địa chỉ'} · Ngày sinh: ${u.dob || '-'}` : '';
+  }
+
+  // ---------- 2. POST /store ----------
+  $('storeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const ownerId = userSelect.value;
+    const storeName = $('storeName').value.trim();
+
+    if (!ownerId)   return showResult('err', 'Vui lòng chọn chủ cửa hàng.');
+    if (!storeName) return showResult('err', 'Tên cửa hàng không được để trống.');
+
+    const body = {
+      storeName,
+      storeDescriptions: $('storeDescriptions').value.trim(),
+      storeImage: $('storeImage').value.trim(),
+      ownerId
+    };
+
+    const btn = $('btnSubmit');
+    btn.disabled = true; btn.textContent = 'Đang tạo...';
+    try {
+      const res = await fetch(`${API}/store?currentUserId=${encodeURIComponent(ownerId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const text = await res.text();
+      const json = text ? JSON.parse(text) : {};
+
+      // BE trả HTTP 200 nhưng lỗi nghiệp vụ nằm trong json.code
+      if (res.ok && json.code === 200) {
+        showResult('ok', json.msg || 'Tạo cửa hàng thành công', json);
+        $('storeForm').reset();
+        $('preview').textContent = 'Chưa có ảnh';
+        showUserInfo();
+      } else {
+        showResult('err', json.msg || `Tạo thất bại (HTTP ${res.status})`, json);
+      }
+    } catch (e) {
+      showResult('err', `Không gọi được POST /store: ${e.message}`);
+    } finally {
+      btn.disabled = false; btn.textContent = 'Tạo cửa hàng';
+    }
+  });
+
+  // ---------- Hiển thị kết quả (dùng textContent để tránh chèn HTML) ----------
+  function showResult(type, msg, json) {
+    const box = $('result');
+    box.innerHTML = '';
+
+    const alert = document.createElement('div');
+    alert.className = `alert ${type}`;
+    alert.textContent = msg;
+    box.append(alert);
+
+    const s = json && json.data;
+    if (type === 'ok' && s) {
+      const card = document.createElement('div');
+      card.className = 'store';
+      if (s.storeImage) {
+        const img = document.createElement('img');
+        img.src = s.storeImage; img.alt = s.storeName || '';
+        card.append(img);
+      }
+      const bodyEl = document.createElement('div');
+      bodyEl.className = 'body';
+      const name = document.createElement('div');
+      name.className = 'name'; name.textContent = s.storeName;
+      const desc = document.createElement('div');
+      desc.className = 'desc'; desc.textContent = s.storeDescriptions || s.description || '';
+      bodyEl.append(name, desc);
+      card.append(bodyEl);
+      box.append(card);
+    }
+    if (json) {
+      const pre = document.createElement('pre');
+      pre.textContent = JSON.stringify(json, null, 2);
+      box.append(pre);
+    }
+  }
+
+  // ---------- Xem trước ảnh ----------
+  $('storeImage').addEventListener('input', e => {
+    const url = e.target.value.trim();
+    const box = $('preview');
+    box.innerHTML = '';
+    if (!url) { box.textContent = 'Chưa có ảnh'; return; }
+    const img = document.createElement('img');
+    img.src = url; img.alt = 'Xem trước';
+    img.onerror = () => { box.textContent = 'Không tải được ảnh từ link này'; };
+    box.append(img);
+  });
+
+  userSelect.addEventListener('change', showUserInfo);
+  $('btnSearch').addEventListener('click', () => loadUsers($('search').value.trim()));
+  $('search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); loadUsers(e.target.value.trim()); }
+  });
+
+  loadUsers();
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+/** Danh muc mau dung chung cho moi san pham */
 @Entity
 @Table(name = "colors")
 @Getter
@@ -14,10 +15,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Color extends BaseEntity {
 
-    @Column(name = "color_name")
+    @Column(name = "color_name", unique = true)
     private String colorName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "size_id")
-    private Size size;
+    @Column(name = "hex_code", length = 7)
+    private String hexCode;
 }

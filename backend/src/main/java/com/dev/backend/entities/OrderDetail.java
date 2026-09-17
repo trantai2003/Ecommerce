@@ -20,10 +20,16 @@ public class OrderDetail extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    // Giu product de con lich su don khi bien the bi xoa
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariant productVariant;
+
+    // Gia tai thoi diem dat hang (copy tu productVariant.price)
     @Column(name = "price", precision = 15, scale = 2)
     private BigDecimal price;
 

@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -50,12 +53,23 @@ public class SecurityConfig {
 
                 // Tra ve 401 thay vi 403 khi chua dang nhap / token khong hop le
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOriginPatterns(List.of("*"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 // Phan quyen cho cac Endpoint
                 .authorizeHttpRequests(authorize -> authorize
                         // Cho phep moi nguoi truy cap cac API Authentication (Dang ky, Dang nhap)
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/store/**").permitAll()
+
+                        // Trang HTML tinh trong resources/static (giao dien test)
+                        .requestMatchers("/*.html").permitAll()
 
                         // Cho phep truy cap tai lieu API Swagger UI cong khai
                         .requestMatchers(

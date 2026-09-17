@@ -9,16 +9,18 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "cart_products",
-        uniqueConstraints = @UniqueConstraint(name = "uk_cart_user_product", columnNames = {"user_id", "product_id"}))
+        uniqueConstraints = @UniqueConstraint(name = "uk_cart_user_variant",
+                columnNames = {"user_id", "product_variant_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
 public class CartProduct extends BaseEntity {
 
+    // Khach chon cu the mau + size -> tro toi bien the, san pham lay qua productVariant.getProduct()
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariant productVariant;
 
     @Builder.Default
     @Column(name = "quantity")

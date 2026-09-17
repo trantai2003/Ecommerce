@@ -9,8 +9,9 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -19,6 +20,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @SuperBuilder
 public class Product extends BaseEntity {
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "image")
     private String image;
@@ -29,17 +33,6 @@ public class Product extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "price", precision = 15, scale = 2)
-    private BigDecimal price;
-
-    @Builder.Default
-    @Column(name = "total_stock")
-    private Integer totalStock = 0;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "color_id")
-    private Color color;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_product_id")
     private CategoryProduct categoryProduct;
@@ -47,6 +40,11 @@ public class Product extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store store;
+
+    // 1 san pham - N bien the (mau + size + gia + ton kho)
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductVariant> variants = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_date", updatable = false)
@@ -58,4 +56,15 @@ public class Product extends BaseEntity {
 
     @Column(name = "created_by")
     private String createdBy;
+
+    // Giu dong bo 2 chieu: dung ham nay thay vi getVariants().add(...)
+    public void addVariant(ProductVariant variant) {
+        variants.add(variant);
+        variant.setProduct(this);
+    }
+
+    public void removeVariant(ProductVariant variant) {
+        variants.remove(variant);
+        variant.setProduct(null);
+    }
 }

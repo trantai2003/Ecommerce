@@ -1,0 +1,266 @@
+// E-commerce + Community DB (PostgreSQL)
+// colors, sizes: danh muc doc lap | product_variants: gia + ton kho theo product + color + size
+// Docs: https://dbml.dbdiagram.io/docs
+
+// ===================== USERS / ROLES =====================
+Table users {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar(255)
+  email varchar(255) [unique]
+  address varchar(255)
+  dob date
+  password varchar(255)
+  create_date date [default: `CURRENT_DATE`]
+  update_date date
+  status boolean [default: true]
+  is_delete boolean [default: false]
+}
+
+Table roles {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar(50) [not null, unique, note: 'ADMIN, SELLER, USER']
+  description varchar(255)
+}
+
+Table user_roles {
+  user_id uuid [not null]
+  role_id uuid [not null]
+
+  indexes {
+    (user_id, role_id) [pk]
+  }
+}
+
+// ===================== STORE =====================
+Table stores {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  store_image varchar(255)
+  store_name varchar(255)
+  description varchar(255)
+  owner_id uuid
+}
+
+Table store_followers {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  store_id uuid
+
+  indexes {
+    (user_id, store_id) [unique, name: 'uk_follower_user_store']
+  }
+}
+
+// ===================== PRODUCT =====================
+Table category_products {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  category_name varchar(255)
+  parent_id uuid [note: 'Danh muc cha (tu tham chieu)']
+}
+
+Table colors {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  color_name varchar(255) [unique]
+  hex_code varchar(7) [note: 'VD: #000000']
+}
+
+Table sizes {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  size_name varchar(255) [unique]
+  sort_order int [default: 0, note: 'S < M < L < XL']
+}
+
+Table products {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  name varchar(255)
+  image varchar(255)
+  gender int
+  description varchar(255)
+  category_product_id uuid
+  store_id uuid
+  created_date timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_date timestamp
+  created_by varchar(255)
+}
+
+Table product_variants {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  product_id uuid [not null]
+  color_id uuid [not null]
+  size_id uuid [not null]
+  sku varchar(100) [unique]
+  price numeric(15,2) [not null]
+  stock int [not null, default: 0]
+  created_date timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_date timestamp
+
+  indexes {
+    (product_id, color_id, size_id) [unique, name: 'uk_variant_product_color_size']
+  }
+
+  Note: 'Quan ly gia + ton kho: moi dong = 1 san pham + 1 mau + 1 size'
+}
+
+Table favorite_products {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  product_id uuid
+
+  indexes {
+    (user_id, product_id) [unique, name: 'uk_favorite_user_product']
+  }
+}
+
+Table cart_products {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  product_variant_id uuid
+  quantity int [default: 1]
+
+  indexes {
+    (user_id, product_variant_id) [unique, name: 'uk_cart_user_variant']
+  }
+}
+
+Table feedbacks {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  product_id uuid
+  comment varchar(255)
+  star int [note: '1 - 5']
+  feedback_time timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+// ===================== ORDER / PAYMENT =====================
+Table orders {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  total_price numeric(15,2)
+  phone varchar(255)
+  name varchar(255)
+  address varchar(255)
+}
+
+Table order_details {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  order_id uuid
+  product_id uuid
+  product_variant_id uuid
+  price numeric(15,2) [note: 'Gia tai thoi diem dat hang']
+  quantity int
+}
+
+Table payments {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  type varchar(255)
+  total_price numeric(15,2)
+}
+
+Table transactions {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  total_price numeric(15,2)
+  payment_id uuid
+  order_id uuid
+  payment_time timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+// ===================== COMMUNITY =====================
+Table category_posts {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  category_name varchar(255)
+}
+
+Table posts {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  category_post_id uuid
+  content text
+  upload_time timestamp [default: `CURRENT_TIMESTAMP`]
+  created_by varchar(255)
+  view_count int [default: 0]
+}
+
+Table comments {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  post_id uuid
+  comment varchar(255)
+}
+
+Table reactions {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  post_id uuid
+  user_id uuid
+
+  indexes {
+    (user_id, post_id) [unique, name: 'uk_reaction_user_post']
+  }
+}
+
+Table notifications {
+  id uuid [primary key, default: `gen_random_uuid()`]
+  user_id uuid
+  title varchar(255)
+  content varchar(255)
+}
+
+// ===================== RELATIONSHIPS (many-to-one) =====================
+Ref: user_roles.user_id > users.id [delete: cascade]
+Ref: user_roles.role_id > roles.id [delete: cascade]
+
+Ref: stores.owner_id > users.id [delete: set null]
+Ref: store_followers.user_id > users.id [delete: cascade]
+Ref: store_followers.store_id > stores.id [delete: cascade]
+
+Ref: category_products.parent_id > category_products.id [delete: set null]
+Ref: products.category_product_id > category_products.id [delete: set null]
+Ref: products.store_id > stores.id [delete: set null]
+
+Ref: product_variants.product_id > products.id [delete: cascade]   // 1 san pham - N bien the
+Ref: product_variants.color_id > colors.id [delete: restrict]      // 1 mau - N bien the
+Ref: product_variants.size_id > sizes.id [delete: restrict]        // 1 size - N bien the
+
+Ref: favorite_products.user_id > users.id [delete: cascade]
+Ref: favorite_products.product_id > products.id [delete: cascade]
+
+Ref: cart_products.user_id > users.id [delete: cascade]
+Ref: cart_products.product_variant_id > product_variants.id [delete: cascade]
+
+Ref: feedbacks.user_id > users.id [delete: set null]
+Ref: feedbacks.product_id > products.id [delete: cascade]
+
+Ref: orders.user_id > users.id [delete: set null]
+Ref: order_details.order_id > orders.id [delete: cascade]
+Ref: order_details.product_id > products.id [delete: set null]
+Ref: order_details.product_variant_id > product_variants.id [delete: set null]
+
+Ref: transactions.user_id > users.id [delete: set null]
+Ref: transactions.payment_id > payments.id [delete: set null]
+Ref: transactions.order_id > orders.id [delete: set null]
+
+Ref: posts.category_post_id > category_posts.id [delete: set null]
+Ref: comments.user_id > users.id [delete: cascade]
+Ref: comments.post_id > posts.id [delete: cascade]
+Ref: reactions.post_id > posts.id [delete: cascade]
+Ref: reactions.user_id > users.id [delete: cascade]
+Ref: notifications.user_id > users.id [delete: cascade]
+
+// ===================== DU LIEU MAU =====================
+Records colors(id, color_name, hex_code) {
+  '00000000-0000-0000-0000-0000000000c1', 'Den', '#000000'
+  '00000000-0000-0000-0000-0000000000c2', 'Trang', '#FFFFFF'
+}
+
+Records sizes(id, size_name, sort_order) {
+  '00000000-0000-0000-0000-0000000000a1', 'M', 2
+  '00000000-0000-0000-0000-0000000000a2', 'L', 3
+}
+
+Records products(id, name) {
+  '00000000-0000-0000-0000-000000000001', 'Ao thun basic'
+}
+
+Records product_variants(product_id, color_id, size_id, sku, price, stock) {
+  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000a1', 'AO-DEN-M', 199000, 10
+  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000a2', 'AO-DEN-L', 209000, 8
+  '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000a1', 'AO-TRANG-M', 199000, 12
+}
