@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/store/**").permitAll()
+                        .requestMatchers("/color/**", "/size/**", "/product/**").permitAll()
 
                         // Trang HTML tinh trong resources/static (giao dien test)
                         .requestMatchers("/*.html").permitAll()
