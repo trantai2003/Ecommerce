@@ -16,7 +16,7 @@ import java.util.UUID;
 public class LoginResponse {
 
     private String token;
-    private UUID uuid;
+    private UUID id;
     private String name;
     private String address;
     private Boolean status;

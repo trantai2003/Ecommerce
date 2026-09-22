@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -65,7 +66,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Cho phep moi nguoi truy cap cac API Authentication (Dang ky, Dang nhap)
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/users/**").permitAll()
+                        // Sua cua hang bat buoc dang nhap (lay user tu JWT). Dat TRUOC dong permitAll /store/**
+                        .requestMatchers(HttpMethod.PUT, "/store/**").authenticated()
                         .requestMatchers("/store/**").permitAll()
                         .requestMatchers("/color/**", "/size/**", "/product/**").permitAll()
 

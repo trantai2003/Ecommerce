@@ -1,5 +1,7 @@
 package com.dev.backend.security;
 
+import com.dev.backend.dto.response.UserTokenResponse;
+import com.dev.backend.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -34,18 +36,21 @@ public class JwtTokenProvider {
     }
 
     // 1. Tao JWT Token tu Email cua nguoi dung
-    public String generateToken(String email) {
-        return generateToken(email, List.of());
+    public String generateToken(UserTokenResponse userTokenResponse) {
+        return generateToken(userTokenResponse, List.of());
     }
 
     // 1b. Tao JWT Token kem danh sach quyen (ROLE_ADMIN, ROLE_USER, ...)
-    public String generateToken(String email, Collection<String> roles) {
+    public String generateToken(UserTokenResponse userTokenResponse, Collection<String> roles) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
-                .subject(email)
-                .claims(Map.of("roles", roles))
+                .subject(userTokenResponse.getEmail())
+                // Map.of khong nhan gia tri null -> dung String.valueOf va gia tri mac dinh
+                .claim("id", String.valueOf(userTokenResponse.getId()))
+                .claim("name", userTokenResponse.getName() == null ? "" : userTokenResponse.getName())
+                .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSecretKey())

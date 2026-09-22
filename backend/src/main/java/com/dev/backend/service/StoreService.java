@@ -15,5 +15,7 @@ public interface StoreService {
 
     Page<StoreResponse> getListStore(int page, int size, String search);
 
-    BaseResponse<StoreResponse> update(UUID currentUserId, UUID storeId,StoreRequest request);
+    BaseResponse<StoreResponse> update(UUID storeId, StoreRequest request);
+
+    BaseResponse<Void> delete(UUID storeId, UUID currentId);
 }

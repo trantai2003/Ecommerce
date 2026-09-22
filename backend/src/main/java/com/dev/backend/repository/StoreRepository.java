@@ -13,6 +13,9 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     boolean existsByStoreNameIgnoreCase(String name);
 
+    // Trung ten voi cua hang KHAC (loai tru chinh no) - dung khi update
+    boolean existsByStoreNameIgnoreCaseAndIdNot(String storeName, UUID id);
+
     boolean existsById(UUID id);
 
     Page<Store> findByStoreNameContainingIgnoreCase(String storeName, Pageable pageable);

@@ -4,6 +4,7 @@ import com.dev.backend.dto.request.LoginRequest;
 import com.dev.backend.dto.response.BaseResponse;
 import com.dev.backend.dto.response.LoginResponse;
 import com.dev.backend.dto.response.UserResponse;
+import com.dev.backend.dto.response.UserTokenResponse;
 import com.dev.backend.entities.Role;
 import com.dev.backend.entities.User;
 import com.dev.backend.mapper.UserMapper;
@@ -45,7 +46,11 @@ public class UserServiceImpl implements UserService {
         boolean checkPassword = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
 
         if (checkPassword) {
-            String token = jwtTokenProvider.generateToken(user.getEmail());
+            UserTokenResponse userTokenResponse = new UserTokenResponse();
+            userTokenResponse.setId(user.getId());
+            userTokenResponse.setEmail(user.getEmail());
+            userTokenResponse.setName(user.getName());
+            String token = jwtTokenProvider.generateToken(userTokenResponse);
             LoginResponse loginResponse = new LoginResponse();
             loginResponse.setToken(token);
             loginResponse.setEmail(user.getEmail());
