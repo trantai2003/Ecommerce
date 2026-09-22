@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface SizeRepository extends JpaRepository<Size, UUID> {
+    boolean existsBySizeNameContainingIgnoreCase(String sizeName);
 }
