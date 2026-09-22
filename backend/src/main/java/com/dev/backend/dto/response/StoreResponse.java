@@ -13,9 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class StoreResponse {
+    String storeImage;
     String storeName;
     String description;
-    String storeImage;
     String ownerName;
     User user;
 }

@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Page<User> findByNameContainingIgnoreCase(String username, Pageable pageable);
 
     Optional<User> findById(UUID id);
+
+    boolean existsById(UUID uuid);
 }
