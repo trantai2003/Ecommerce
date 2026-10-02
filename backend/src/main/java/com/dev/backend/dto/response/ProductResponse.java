@@ -27,7 +27,7 @@ public class ProductResponse {
     BigDecimal minPrice;      // gia thap nhat trong cac bien the -> hien thi "tu 199.000d"
     Integer totalStock;       // tong ton kho cua cac bien the
 
-    List<VariantResponse> variants;
+    List<ProductVariantResponse> variants;
 
     LocalDateTime createdDate;
     LocalDateTime updatedDate;

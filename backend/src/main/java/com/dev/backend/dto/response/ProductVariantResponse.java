@@ -6,19 +6,16 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/** 1 bien the cua san pham: mau + size + gia + ton kho */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VariantResponse {
-    UUID id;
-    String sku;
+public class ProductVariantResponse {
     String colorName;
-    String hexCode;
     String sizeName;
+    String sku;
     BigDecimal price;
     Integer stock;
 }

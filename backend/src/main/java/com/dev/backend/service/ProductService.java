@@ -9,5 +9,9 @@ import java.util.UUID;
 
 @Service
 public interface ProductService {
-    BaseResponse<ProductResponse> create(UUID currentUserId, ProductCreateRequest request);
+    Void create_v1(UUID currentUserId, ProductCreateRequest request);
+
+    BaseResponse<ProductResponse> create_v2(UUID currentUserId, ProductCreateRequest request);
+
+    BaseResponse<ProductResponse> create_v3(UUID currentUserId, ProductCreateRequest request);
 }

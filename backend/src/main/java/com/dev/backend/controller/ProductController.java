@@ -6,10 +6,7 @@ import com.dev.backend.dto.response.ProductResponse;
 import com.dev.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -19,7 +16,19 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
 
-    public ResponseEntity<BaseResponse<ProductResponse>> create(@RequestParam UUID currentUserId, @RequestBody ProductCreateRequest request) {
-        return ResponseEntity.ok(productService.create(currentUserId, request));
+    @PostMapping("create_v1")
+    public ResponseEntity create_v1(@RequestParam UUID currentUserId, @RequestBody ProductCreateRequest request) {
+        return ResponseEntity.ok(productService.create_v1(currentUserId, request));
     }
+
+    @PostMapping("create_v2")
+    public ResponseEntity<BaseResponse<ProductResponse>> create_v2(@RequestParam UUID currentUserId, @RequestBody ProductCreateRequest request) {
+        return ResponseEntity.ok(productService.create_v2(currentUserId, request));
+    }
+
+    @PostMapping("create_v3")
+    public ResponseEntity<BaseResponse<ProductResponse>> create_v3(@RequestParam UUID currentUserId, @RequestBody ProductCreateRequest request) {
+        return ResponseEntity.ok(productService.create_v3(currentUserId, request));
+    }
+
 }

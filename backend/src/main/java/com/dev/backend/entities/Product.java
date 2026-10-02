@@ -54,8 +54,8 @@ public class Product extends BaseEntity {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
-    @Column(name = "created_by")
-    private String createdBy;
+//    @Column(name = "created_by")
+//    private String createdBy;
 
     // Giu dong bo 2 chieu: dung ham nay thay vi getVariants().add(...)
     public void addVariant(ProductVariant variant) {
