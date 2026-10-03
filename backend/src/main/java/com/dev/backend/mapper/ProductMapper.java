@@ -1,7 +1,9 @@
 package com.dev.backend.mapper;
 
 import com.dev.backend.dto.request.ProductCreateRequest;
+import com.dev.backend.dto.request.ProductUpdateRequest;
 import com.dev.backend.dto.response.ProductResponse;
+import com.dev.backend.dto.response.ProductUpdateResponse;
 import com.dev.backend.entities.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,7 +25,7 @@ public interface ProductMapper {
     //target (source)
     Product toProduct(ProductCreateRequest productCreateRequest);
 
-    @Mapping(target = "id", ignore = true)
+//    @Mapping(target = "id", ignore = true)
     @Mapping(source = "categoryProduct.categoryName", target = "categoryName")
     @Mapping(source = "store.storeName", target = "storeName")
     @Mapping(target = "minPrice", ignore = true)
@@ -31,5 +33,16 @@ public interface ProductMapper {
         // target - (source)
     ProductResponse toProductResponse(Product product);
 
+    //Update
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "categoryId", target = "categoryProduct.id")
+    @Mapping(source = "storeId", target = "store.id")
+    @Mapping(target = "variants", ignore = true)
+    @Mapping(target = "updatedDate", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
+    Product requestUpdateProductToProduct(ProductUpdateRequest productUpdateRequest);
 
+    @Mapping(source = "categoryProduct.categoryName", target = "categoryName")
+    @Mapping(source = "store.storeName", target = "storeName")
+    ProductUpdateResponse productToProductUpdateResponse(Product product);
 }

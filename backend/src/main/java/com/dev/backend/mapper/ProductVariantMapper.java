@@ -1,7 +1,9 @@
 package com.dev.backend.mapper;
 
 import com.dev.backend.dto.request.ProductVariantRequest;
+import com.dev.backend.dto.request.ProductVariantUpdateRequest;
 import com.dev.backend.dto.response.ProductVariantResponse;
+import com.dev.backend.dto.response.ProductVariantUpdateResponse;
 import com.dev.backend.entities.ProductVariant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,5 +26,21 @@ public interface ProductVariantMapper {
     @Mapping(target = "updatedDate", ignore = true)
 //    @Mapping(target = "product", ignore = true)
     ProductVariant toProductVariant(ProductVariantRequest productVariantRequest);
+
+
+    //Update
+
+    @Mapping(source = "variantId", target = "id")
+//    @Mapping(target = "product", ignore = true)
+    @Mapping(source = "colorId", target = "color.id")
+    @Mapping(source = "sizeId", target = "size.id")
+    @Mapping(target = "updatedDate", ignore = true)
+    @Mapping(target = "createdDate", ignore = true)
+    ProductVariant updateProductVariantToProductVariant(ProductVariantUpdateRequest productVariantUpdateRequest);
+
+    @Mapping(source = "color.colorName", target = "colorName")
+    @Mapping(source = "size.sizeName", target = "sizeName")
+    @Mapping(source = "updatedDate", target = "updatedDate")
+    ProductVariantUpdateResponse productVariantToProductVariantResponse(ProductVariant productVariant);
 
 }
